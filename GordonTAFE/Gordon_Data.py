@@ -77,6 +77,14 @@ course_links_file_path = Path(os.getcwd().replace('\\', '/'))
 course_links_file_path = course_links_file_path.__str__() + '/gordon_links_file'
 course_links_file = open(course_links_file_path, 'r')
 
+ft_course_links_file_path = Path(os.getcwd().replace('\\', '/'))
+ft_course_links_file_path = ft_course_links_file_path.__str__() + '/gordon_free_tafe_links_file'
+ft_course_links_file = open(ft_course_links_file_path, 'r')
+
+ta_course_links_file_path = Path(os.getcwd().replace('\\', '/'))
+ta_course_links_file_path = ta_course_links_file_path.__str__() + '/gordon_train_links_file'
+ta_course_links_file = open(ta_course_links_file_path, 'r')
+
 # the csv file we'll be saving the courses to
 csv_file_path = Path(os.getcwd().replace('\\', '/'))
 csv_file = 'Gordon_All_Data.csv'
@@ -102,7 +110,11 @@ course_data_template = {'Level_Code': '', 'University': '', 'City': '', 'Course'
                         'Career_Outcomes': '',
                         'Country': 'Australia', 'Online': 'No', 'Offline': 'Yes', 'Distance': 'No',
                         'Face_to_Face': 'Yes',
-                        'Blended': 'No', 'Remarks': ''}
+                        'Blended': 'No', 'Remarks': '',
+                        'Course_Delivery_Mode': 'Traineeship',
+                        # is this an Apprenticeship, Traineeship, or just a Normal course?
+                        'FREE_TAFE': 'No'  # is this a free of charge TAFE course, supposedly sponsored by agencies?
+                        }
 
 # noinspection SpellCheckingInspection
 possible_cities = {'east geelong campus': 'Melbourne (East Geelong Campus)',
@@ -113,7 +125,9 @@ possible_cities = {'east geelong campus': 'Melbourne (East Geelong Campus)',
                    'off campus': '',
                    'werribee watton campus': 'Melbourne (Werribee Watton Campus)',
                    'ballarat': 'Ballarat',
-                   '': ''}
+                   '': 'Melbourne',
+                   'melbourne': 'Melbourne',
+                   'colac trade training centre': 'Colac'}
 
 other_cities = {}
 
@@ -125,7 +139,8 @@ sample = ['']
 for each_url in course_links_file:
 
     # noinspection SpellCheckingInspection
-    course_data = {'Level_Code': '', 'University': 'Gordon Geelong Institute of TAFE', 'City': '', 'Course': '',
+    course_data = {'Level_Code': '', 'University': 'Gordon Geelong Institute of TAFE', 'City': 'Melbourne',
+                   'Course': '',
                    'Faculty': '',
                    'Int_Fees': '', 'Local_Fees': '', 'Currency': 'AUD', 'Currency_Time': 'Course', 'Duration': '',
                    'Duration_Time': '', 'Full_Time': 'Yes', 'Part_Time': 'No',
@@ -135,7 +150,11 @@ for each_url in course_links_file:
                    'Website': '', 'Course_Lang': 'English', 'Availability': 'A', 'Description': '',
                    'Career_Outcomes': '',
                    'Country': 'Australia', 'Online': 'No', 'Offline': 'Yes', 'Distance': 'No', 'Face_to_Face': 'Yes',
-                   'Blended': 'No', 'Remarks': ''}
+                   'Blended': 'No', 'Remarks': '',
+                   'Course_Delivery_Mode': 'Traineeship',
+                   # is this an Apprenticeship, Traineeship, or just a Normal course?
+                   'FREE_TAFE': 'No'  # is this a free of charge TAFE course, supposedly sponsored by agencies?
+                   }
 
     actual_cities = set()
 
@@ -186,7 +205,7 @@ for each_url in course_links_file:
             actual_cities.add(city)
             print('city so far: ', city)
     except AttributeError:
-        actual_cities.add('')
+        actual_cities.add('melbourne')
         print('city not found')
     try:
         divs1 = soup.find('div', {'id': 'IntakesTable'}).find_all('div', {'class': 'row'})
@@ -226,25 +245,29 @@ for each_url in course_links_file:
 
     # FEES
     try:
-        fee_data = soup.find('span', text=re.compile('full fee tuition', re.IGNORECASE))\
+        fee_data = soup.find('span', text=re.compile('full fee tuition', re.IGNORECASE)) \
             .find_next('span').find_next('span').find_next('span').find_next('span')
         if fee_data:
             fee = tag_text(fee_data)
-            course_data['Int_Fees'] = course_data['Local_Fees'] = fee.replace('AUD', '').replace(',', '').replace('$', '')
+            course_data['Int_Fees'] = course_data['Local_Fees'] = fee.replace('AUD', '').replace(',', '').replace('$',
+                                                                                                                  '')
             print('fees so far: ', fee)
     except AttributeError:
         try:
             fee_data = soup.find('span', text=re.compile('^ Cost \(inc\. GST\):', re.IGNORECASE)).find_next('span')
             if fee_data:
                 fee = tag_text(fee_data)
-                course_data['Int_Fees'] = course_data['Local_Fees'] = fee.replace('AUD', '').replace(',', '').replace('$', '')
+                course_data['Int_Fees'] = course_data['Local_Fees'] = fee.replace('AUD', '').replace(',', '').replace(
+                    '$', '')
                 print('fees so far: ', fee)
         except AttributeError:
             try:
                 fee_data = soup.find('span', text=re.compile('Full Fee Cost', re.IGNORECASE)).find_next('span')
                 if fee_data:
                     fee = tag_text(fee_data)
-                    course_data['Int_Fees'] = course_data['Local_Fees'] = fee.replace('AUD', '').replace(',', '').replace('$', '')
+                    course_data['Int_Fees'] = course_data['Local_Fees'] = fee.replace('AUD', '').replace(',',
+                                                                                                         '').replace(
+                        '$', '')
                     print('fees so far: ', fee)
             except AttributeError:
                 print('cant find fees')
@@ -295,9 +318,59 @@ for each_url in course_links_file:
     except AttributeError:
         pass
 
+    # FIND FREE COURSE
+    if 'this is a free tafe course' in course_data['Description'].lower():
+        course_data['FREE_TAFE'] = 'Yes'
+
+    # CHECK IF COURSE IS A NORMALLY DELIVERED COURSE
+    try:
+        short_course_div = soup.find('div', {'class': 'shortCourseSessions block'})
+        if short_course_div:
+            course_data['Course_Delivery_Mode'] = 'Normal'
+    except AttributeError:
+        pass
+
+    try:
+        normal_duration_div = soup.find('div', {'id': 'IntakesTable'})\
+            .find('div', {'class': 'row'})\
+            .find('span', {'class': 'HideS'})
+        if normal_duration_div:
+            val = tag_text(normal_duration_div)
+            if len(val) > 3:
+                course_data['Course_Delivery_Mode'] = 'Normal'
+    except (TypeError, AttributeError):
+        pass
+
+    # CHECK IF COURSE IS APPRENTICESHIP
+    try:
+        apprentice_duration_div = soup.find('div', {'id': 'IntakesTable'}) \
+            .find('div', {'class': 'row'}) \
+            .find('span', {'class': 'HideA'})
+        if apprentice_duration_div:
+            val = tag_text(apprentice_duration_div)
+            if len(val) > 3:
+                course_data['Course_Delivery_Mode'] = 'Apprenticeship'
+    except (TypeError, AttributeError):
+        pass
+
+    # CHECK IF COURSE IS TRAINEESHIP
+    try:
+        train_duration_div = soup.find('div', {'id': 'IntakesTable'}) \
+            .find('div', {'class': 'row'}) \
+            .find('span', {'class': 'HideT'})
+        if train_duration_div:
+            val = tag_text(train_duration_div)
+            if len(val) > 3:
+                course_data['Course_Delivery_Mode'] = 'Traineeship'
+    except (TypeError, AttributeError):
+        pass
+
     # duplicating entries with multiple cities for each city
     for i in actual_cities:
-        course_data['City'] = possible_cities[i.lower()]
+        try:
+            course_data['City'] = possible_cities[i.lower()]
+        except KeyError:
+            course_data['City'] = 'Melbourne'
         print('repeated cities: ', course_data['City'])
         course_data_all.append(copy.deepcopy(course_data))
     del actual_cities
@@ -324,6 +397,8 @@ for each_url in course_links_file:
     print('FACE TO FACE: ', course_data['Face_to_Face'])
     print('OUTCOMES: ', course_data['Career_Outcomes'])
     print('REMARKS: ', course_data['Remarks'])
+    print('FREE TAFE: ', course_data['FREE_TAFE'])
+    print('Traineeship or Apprenticeship: ', course_data['Course_Delivery_Mode'])
     print()
 
 print(*course_data_all, sep='\n')
