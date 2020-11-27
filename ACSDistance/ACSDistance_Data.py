@@ -91,7 +91,7 @@ option.add_argument(" - incognito")
 exec_path = Path(os.getcwd().replace('\\', '/'))
 exec_path = exec_path.parent.parent.parent.__str__() + '/Libraries/Google/v86/chromedriver.exe'
 browser = webdriver.Chrome(executable_path=exec_path, chrome_options=option)
-browser.maximize_window()
+# browser.maximize_window()
 delay = 2
 
 # collect page source for fees
@@ -148,14 +148,34 @@ course_data_template = {'Level_Code': '', 'University': '', 'City': '', 'Course'
                         'Career_Outcomes': '',
                         'Country': 'Australia', 'Online': 'No', 'Offline': 'Yes', 'Distance': 'No',
                         'Face_to_Face': 'Yes',
-                        'Blended': 'No', 'Remarks': ''}
+                        'Blended': 'No', 'Remarks': '',
+                        'Subject_or_Unit_1': '', 'Subject_Objective_1': '', 'Subject_Description_1': '',
+                        'Subject_or_Unit_2': '', 'Subject_Objective_2': '', 'Subject_Description_2': '',
+                        'Subject_or_Unit_3': '', 'Subject_Objective_3': '', 'Subject_Description_3': '',
+                        'Subject_or_Unit_4': '', 'Subject_Objective_4': '', 'Subject_Description_4': '',
+                        'Subject_or_Unit_5': '', 'Subject_Objective_5': '', 'Subject_Description_5': '',
+                        'Subject_or_Unit_6': '', 'Subject_Objective_6': '', 'Subject_Description_6': '',
+                        'Subject_or_Unit_7': '', 'Subject_Objective_7': '', 'Subject_Description_7': '',
+                        'Subject_or_Unit_8': '', 'Subject_Objective_8': '', 'Subject_Description_8': '',
+                        'Subject_or_Unit_9': '', 'Subject_Objective_9': '', 'Subject_Description_9': '',
+                        'Subject_or_Unit_10': '', 'Subject_Objective_10': '', 'Subject_Description_10': '',
+                        'Subject_or_Unit_11': '', 'Subject_Objective_11': '', 'Subject_Description_11': '',
+                        'Subject_or_Unit_12': '', 'Subject_Objective_12': '', 'Subject_Description_12': '',
+                        'Subject_or_Unit_13': '', 'Subject_Objective_13': '', 'Subject_Description_13': '',
+                        'Subject_or_Unit_14': '', 'Subject_Objective_14': '', 'Subject_Description_14': '',
+                        'Subject_or_Unit_15': '', 'Subject_Objective_15': '', 'Subject_Description_15': '',
+                        'Subject_or_Unit_16': '', 'Subject_Objective_16': '', 'Subject_Description_16': '',
+                        'Subject_or_Unit_17': '', 'Subject_Objective_17': '', 'Subject_Description_17': '',
+                        'Subject_or_Unit_18': '', 'Subject_Objective_18': '', 'Subject_Description_18': '',
+                        'Subject_or_Unit_19': '', 'Subject_Objective_19': '', 'Subject_Description_19': '',
+                        'Subject_or_Unit_20': '', 'Subject_Objective_20': '', 'Subject_Description_20': ''}
 
 # noinspection SpellCheckingInspection
 possible_cities = {'Queensland': 'Queensland'}
 
 other_cities = {}
 
-sample = ["https://www.eit.edu.au/courses/on-campus-master-of-engineering-electrical-systems/"]
+sample = ["https://www.acs.edu.au/courses/abnormal-psychology-187.aspx"]
 
 # MAIN ROUTINE
 for each_url in course_links_file:
@@ -170,7 +190,27 @@ for each_url in course_links_file:
                    'Website': '', 'Course_Lang': 'English', 'Availability': 'A', 'Description': '',
                    'Career_Outcomes': '',
                    'Country': 'Australia', 'Online': 'No', 'Offline': 'Yes', 'Distance': 'Yes', 'Face_to_Face': 'Yes',
-                   'Blended': 'No', 'Remarks': ''}
+                   'Blended': 'No', 'Remarks': '',
+                   'Subject_or_Unit_1': '', 'Subject_Objective_1': '', 'Subject_Description_1': '',
+                   'Subject_or_Unit_2': '', 'Subject_Objective_2': '', 'Subject_Description_2': '',
+                   'Subject_or_Unit_3': '', 'Subject_Objective_3': '', 'Subject_Description_3': '',
+                   'Subject_or_Unit_4': '', 'Subject_Objective_4': '', 'Subject_Description_4': '',
+                   'Subject_or_Unit_5': '', 'Subject_Objective_5': '', 'Subject_Description_5': '',
+                   'Subject_or_Unit_6': '', 'Subject_Objective_6': '', 'Subject_Description_6': '',
+                   'Subject_or_Unit_7': '', 'Subject_Objective_7': '', 'Subject_Description_7': '',
+                   'Subject_or_Unit_8': '', 'Subject_Objective_8': '', 'Subject_Description_8': '',
+                   'Subject_or_Unit_9': '', 'Subject_Objective_9': '', 'Subject_Description_9': '',
+                   'Subject_or_Unit_10': '', 'Subject_Objective_10': '', 'Subject_Description_10': '',
+                   'Subject_or_Unit_11': '', 'Subject_Objective_11': '', 'Subject_Description_11': '',
+                   'Subject_or_Unit_12': '', 'Subject_Objective_12': '', 'Subject_Description_12': '',
+                   'Subject_or_Unit_13': '', 'Subject_Objective_13': '', 'Subject_Description_13': '',
+                   'Subject_or_Unit_14': '', 'Subject_Objective_14': '', 'Subject_Description_14': '',
+                   'Subject_or_Unit_15': '', 'Subject_Objective_15': '', 'Subject_Description_15': '',
+                   'Subject_or_Unit_16': '', 'Subject_Objective_16': '', 'Subject_Description_16': '',
+                   'Subject_or_Unit_17': '', 'Subject_Objective_17': '', 'Subject_Description_17': '',
+                   'Subject_or_Unit_18': '', 'Subject_Objective_18': '', 'Subject_Description_18': '',
+                   'Subject_or_Unit_19': '', 'Subject_Objective_19': '', 'Subject_Description_19': '',
+                   'Subject_or_Unit_20': '', 'Subject_Objective_20': '', 'Subject_Description_20': ''}
 
     actual_cities = set()
 
@@ -241,7 +281,7 @@ for each_url in course_links_file:
             value = browser.find_element_by_xpath(f'{THE_XPATH}').text
             course_data['Description'] = value
         except (AttributeError, TimeoutException, NoSuchElementException, ElementNotInteractableException) as e:
-            logging.warning(e)
+            print(f'cant extract description: {e}')
 
     # LOCAL FEES
     try:
@@ -365,6 +405,82 @@ for each_url in course_links_file:
     course_data['Online'] = 'Yes'
     course_data['Currency_Time'] = 'Course'
     actual_cities.add('Queensland')
+
+    # SUBJECTS
+    try:
+        THE_XPATH = "//h2[@class='courseSection']/following::ol/li"
+        THE_OTHER_XPATH = "//h2[@class='courseSection']/following::ol/li/ul"
+        WebDriverWait(browser, delay).until(
+            EC.presence_of_all_elements_located(
+                (By.XPATH, f'{THE_XPATH}'))
+        )
+        values1 = browser.find_elements_by_xpath(f'{THE_XPATH}')
+        values2 = browser.find_elements_by_xpath(f'{THE_OTHER_XPATH}')
+        i = 1
+        for li, ul in zip(values1, values2):
+            subject = li.text.replace(ul.text, '')
+            subject_description = ul.text
+            course_data[f'Subject_or_Unit_{i}'] = subject.replace('\n', '')
+            course_data[f'Subject_Description_{i}'] = subject_description
+            print(f'SUBJECT: {subject}\nSUBJECT DESCRIPTION: {subject_description}')
+            i += 1
+            if i is 20:
+                break
+    except (AttributeError, TimeoutException, NoSuchElementException, ElementNotInteractableException) as e:
+        subjects_links = []
+        domain_url = "https://www.acs.edu.au/"
+        a_tags = browser.find_elements_by_xpath("//table[@class='courseModules']/tbody/tr/td/a")
+        for a in a_tags:
+            link = a.get_attribute('href')
+            if link:
+                link_ = urljoin(domain_url, link)
+                if link_ not in subjects_links:
+                    subjects_links.append(link_)
+            if len(subjects_links) is 20:
+                break
+        i = 1
+        for sl in subjects_links:
+            browser.get(sl)
+            try:
+                THE_XPATH = "//*[contains(@id, 'CourseName')][1]"
+                WebDriverWait(browser, delay).until(
+                    EC.presence_of_all_elements_located(
+                        (By.XPATH, f'{THE_XPATH}'))
+                )
+                value = browser.find_element_by_xpath(f'{THE_XPATH}').text
+                course_data[f'Subject_or_Unit_{i}'] = value
+            except (AttributeError, TimeoutException, NoSuchElementException, ElementNotInteractableException) as e:
+                print(f'cant extract subject name {i}')
+            try:
+                THE_XPATH = "//div[@id='courseDescription']/h2/following::*[1]"
+                WebDriverWait(browser, delay).until(
+                    EC.presence_of_all_elements_located(
+                        (By.XPATH, f'{THE_XPATH}'))
+                )
+                value = browser.find_element_by_xpath(f'{THE_XPATH}').text
+                course_data[f'Subject_Description_{i}'] = value
+
+                THE_XPATH = "((//*[contains(@id, 'CourseName')])[1]/ancestor::*[1 and not(self::h1) and not(self::table)])[10]"
+                WebDriverWait(browser, delay).until(
+                    EC.presence_of_all_elements_located(
+                        (By.XPATH, f'{THE_XPATH}'))
+                )
+                value = browser.find_element_by_xpath(f'{THE_XPATH}').text
+                course_data[f'Subject_Description_{i}'] += bar + value
+            except (AttributeError, TimeoutException, NoSuchElementException, ElementNotInteractableException) as e2:
+                print(f'cant extract subjects: {e2}')
+                try:
+                    THE_XPATH = "((//*[contains(@id, 'CourseName')])[1]/ancestor::*[1 and not(self::h1) and not(self::table)])[10]"
+                    WebDriverWait(browser, delay).until(
+                        EC.presence_of_all_elements_located(
+                            (By.XPATH, f'{THE_XPATH}'))
+                    )
+                    value = browser.find_element_by_xpath(f'{THE_XPATH}').text
+                    course_data[f'Subject_Description_{i}'] = value
+                except (AttributeError, TimeoutException, NoSuchElementException, ElementNotInteractableException) as e:
+                    print(f'cant extract subject description{i}: {e}')
+            print(f"SUBJECT {i}: {course_data[f'Subject_or_Unit_{i}']}\nSUBJECT DESCRIPTION {i}: {course_data[f'Subject_Description_{i}']}")
+            i += 1
 
     # duplicating entries with multiple cities for each city
     cities_covered = []
