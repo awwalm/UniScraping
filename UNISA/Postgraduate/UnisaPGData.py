@@ -4,10 +4,9 @@ import json
 import re
 import time
 from pathlib import Path
-
-# noinspection PyProtectedMember
 from urllib.parse import urljoin
 
+# noinspection PyProtectedMember
 from bs4 import Comment
 from selenium import webdriver
 from selenium.common.exceptions import *
