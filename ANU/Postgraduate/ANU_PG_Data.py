@@ -6,8 +6,14 @@ import time
 from pathlib import Path
 
 # noinspection PyProtectedMember
+from urllib.parse import urljoin
+
 from bs4 import Comment
 from selenium import webdriver
+from selenium.common.exceptions import *
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from CustomMethods import DurationConverter, TemplateData
 import bs4 as bs4
 import requests
@@ -92,7 +98,28 @@ course_data = {'Level_Code': '', 'University': 'Australian National University',
                'Prerequisite_1_grade_1': '',
                'Website': '', 'Course_Lang': 'English', 'Availability': 'A', 'Description': '', 'Career_Outcomes': '',
                'Country': 'Australia', 'Online': 'No', 'Offline': 'Yes', 'Distance': 'No', 'Face_to_Face': '',
-               'Blended': 'No', 'Remarks': remarks}
+               'Blended': 'No', 'Remarks': remarks,
+               'Subject_or_Unit_1': '', 'Subject_Objective_1': '', 'Subject_Description_1': '',
+               'Subject_or_Unit_2': '', 'Subject_Objective_2': '', 'Subject_Description_2': '',
+               'Subject_or_Unit_3': '', 'Subject_Objective_3': '', 'Subject_Description_3': '',
+               'Subject_or_Unit_4': '', 'Subject_Objective_4': '', 'Subject_Description_4': '',
+               'Subject_or_Unit_5': '', 'Subject_Objective_5': '', 'Subject_Description_5': '',
+               'Subject_or_Unit_6': '', 'Subject_Objective_6': '', 'Subject_Description_6': '',
+               'Subject_or_Unit_7': '', 'Subject_Objective_7': '', 'Subject_Description_7': '',
+               'Subject_or_Unit_8': '', 'Subject_Objective_8': '', 'Subject_Description_8': '',
+               'Subject_or_Unit_9': '', 'Subject_Objective_9': '', 'Subject_Description_9': '',
+               'Subject_or_Unit_10': '', 'Subject_Objective_10': '', 'Subject_Description_10': '',
+               'Subject_or_Unit_11': '', 'Subject_Objective_11': '', 'Subject_Description_11': '',
+               'Subject_or_Unit_12': '', 'Subject_Objective_12': '', 'Subject_Description_12': '',
+               'Subject_or_Unit_13': '', 'Subject_Objective_13': '', 'Subject_Description_13': '',
+               'Subject_or_Unit_14': '', 'Subject_Objective_14': '', 'Subject_Description_14': '',
+               'Subject_or_Unit_15': '', 'Subject_Objective_15': '', 'Subject_Description_15': '',
+               'Subject_or_Unit_16': '', 'Subject_Objective_16': '', 'Subject_Description_16': '',
+               'Subject_or_Unit_17': '', 'Subject_Objective_17': '', 'Subject_Description_17': '',
+               'Subject_or_Unit_18': '', 'Subject_Objective_18': '', 'Subject_Description_18': '',
+               'Subject_or_Unit_19': '', 'Subject_Objective_19': '', 'Subject_Description_19': '',
+               'Subject_or_Unit_20': '', 'Subject_Objective_20': '', 'Subject_Description_20': ''
+               }
 
 level_key = TemplateData.level_key  # dictionary of course levels
 
@@ -276,7 +303,7 @@ for each_url in course_links_file:
                 course_data['Duration'] = duration
                 course_data['Duration_Time'] = duration_time
                 print('DURATION + DURATION TIME: ', duration, duration_time)
-    except IndexError:
+    except (AttributeError, TypeError, IndexError):
         course_data['Full_Time'] = ''
         course_data['Part_Time'] = ''
         course_data['Duration'] = ''
@@ -288,25 +315,102 @@ for each_url in course_links_file:
         course_data['Blended'] = 'Yes'
 
     # PREREQUISITES 1
-    div_ps = soup.find('div', id='admission-and-fees').find('div', class_='body__inner w-doublewide copy').find_all('p')
-    if div_ps:
-        try:
-            for p in div_ps:
-                gpa_raw = p.get_text().__str__().strip()
-                if 'with a minimum gpa of' in gpa_raw.lower():
-                    g = gpa_raw.lower()
-                    if '4.' in g or '5.' in g or '6.' in g or '7.' \
-                            and '4/' not in g and '6/' not in g and '7/' not in g:
-                        gpa_temp_1 = int(list(filter(str.isdigit, gpa_raw))[0])
-                        gpa_temp_2 = int(list(filter(str.isdigit, gpa_raw))[1])
-                        gpa_temp = str(gpa_temp_1) + '.' + str(gpa_temp_2)
-                        course_data['Prerequisite_1_grade_1'] = gpa_temp
-                    elif '4/' in g or '5/' in g or '6/' in g or '7/' in g:
-                        gpa_temp_1 = int(list(filter(str.isdigit, gpa_raw))[0])
-                        course_data['Prerequisite_1_grade_1'] = gpa_temp_1
-                    # break
-        except IndexError:
-            course_data['Prerequisite_1_grade_1'] = ''
+    try:
+        div_ps = soup.find('div', id='admission-and-fees').find('div', class_='body__inner w-doublewide copy').find_all('p')
+        if div_ps:
+            try:
+                for p in div_ps:
+                    gpa_raw = p.get_text().__str__().strip()
+                    if 'with a minimum gpa of' in gpa_raw.lower():
+                        g = gpa_raw.lower()
+                        if '4.' in g or '5.' in g or '6.' in g or '7.' \
+                                and '4/' not in g and '6/' not in g and '7/' not in g:
+                            gpa_temp_1 = int(list(filter(str.isdigit, gpa_raw))[0])
+                            gpa_temp_2 = int(list(filter(str.isdigit, gpa_raw))[1])
+                            gpa_temp = str(gpa_temp_1) + '.' + str(gpa_temp_2)
+                            course_data['Prerequisite_1_grade_1'] = gpa_temp
+                        elif '4/' in g or '5/' in g or '6/' in g or '7/' in g:
+                            gpa_temp_1 = int(list(filter(str.isdigit, gpa_raw))[0])
+                            course_data['Prerequisite_1_grade_1'] = gpa_temp_1
+                        # break
+            except IndexError:
+                course_data['Prerequisite_1_grade_1'] = ''
+    except (TypeError, AttributeError):
+        pass
+
+    # REMARKS
+    delay = 2
+    try:
+        THE_XPATH = "//*[@id='admission-and-fees']"
+        WebDriverWait(browser, delay).until(
+            EC.presence_of_all_elements_located(
+                (By.XPATH, f'{THE_XPATH}'))
+        )
+        value = browser.find_element_by_xpath(f'{THE_XPATH}').text
+        course_data['Remarks'] = value
+    except (AttributeError, TimeoutException, NoSuchElementException, ElementNotInteractableException) as e:
+        print(f'cant extract remarks: {e}')
+
+    # SUBJECTS
+    try:
+        THE_XPATH = "//div[@id='study']/div/p[contains(@style, 'margin')]/a[@href]"
+        WebDriverWait(browser, 1).until(
+            EC.presence_of_all_elements_located(
+                (By.XPATH, f'{THE_XPATH}'))
+        )
+        values = browser.find_elements_by_xpath(f'{THE_XPATH}')
+
+        a_tags = values
+        subjects_links = []
+        domain_url = "https://programsandcourses.anu.edu.au/"
+        delay = 3
+        for a in a_tags:
+            link = a.get_attribute('href')
+            if link:
+                link_ = urljoin(domain_url, link)
+                if link_ not in subjects_links:
+                    subjects_links.append(link_)
+            if len(subjects_links) is 20:
+                break
+        i = 1
+        for sl in subjects_links:
+            browser.get(sl)
+            try:
+                THE_XPATH = "//h1[@class='intro__degree-title'][1]"
+                WebDriverWait(browser, delay).until(
+                    EC.presence_of_all_elements_located(
+                        (By.XPATH, f'{THE_XPATH}'))
+                )
+                value = browser.find_element_by_xpath(f'{THE_XPATH}').text
+                course_data[f'Subject_or_Unit_{i}'] = value
+            except (AttributeError, TimeoutException, NoSuchElementException, ElementNotInteractableException) as e:
+                print(f'cant extract subject name {i}: {e}')
+            try:
+                THE_XPATH = "//div[@id='introduction']"
+                WebDriverWait(browser, delay).until(
+                    EC.presence_of_all_elements_located(
+                        (By.XPATH, f'{THE_XPATH}'))
+                )
+                value = browser.find_element_by_xpath(f'{THE_XPATH}').text
+                course_data[f'Subject_Description_{i}'] = value
+            except (AttributeError, TimeoutException, NoSuchElementException, ElementNotInteractableException) as e:
+                print(f'cant extract subject description {i}: {e}')
+            try:
+                THE_XPATH = "//h2[@id='learning-outcomes']/following::ol[1]"
+                WebDriverWait(browser, delay).until(
+                    EC.presence_of_all_elements_located(
+                        (By.XPATH, f'{THE_XPATH}'))
+                )
+                value = browser.find_element_by_xpath(f'{THE_XPATH}').text
+                course_data[f'Subject_Objective_{i}'] = value
+            except (AttributeError, TimeoutException, NoSuchElementException, ElementNotInteractableException) as e:
+                print(f'cant extract subject objective {i}: {e}')
+            print(f"SUBJECT {i}: {course_data[f'Subject_or_Unit_{i}']}\n"
+                  f"SUBJECT OBJECTIVES {i}: {course_data[f'Subject_Objective_{i}']}\n"
+                  f"SUBJECT DESCRIPTION {i}: {course_data[f'Subject_Description_{i}']}\n")
+            i += 1
+    except (AttributeError, TimeoutException, NoSuchElementException, ElementNotInteractableException) as e:
+        print(f'cant extract subjects: {e}')
 
     print('AVAILABILITY: ', course_data['Availability'])
     print('GPA: ', course_data['Prerequisite_1_grade_1'])
