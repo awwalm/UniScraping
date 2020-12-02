@@ -4,10 +4,9 @@ import json
 import re
 import time
 from pathlib import Path
-
-# noinspection PyProtectedMember
 from urllib.parse import urljoin
 
+# noinspection PyProtectedMember
 from bs4 import Comment
 from selenium import webdriver
 from selenium.common.exceptions import *
@@ -29,8 +28,8 @@ def get_page(url):
         r = requests.get(url)
         if r.status_code == 200:
             return bs4.BeautifulSoup(r.content, 'html.parser')
-    except Exception as e:
-        pass
+    except Exception as exp:
+        print(exp)
     return None
 
 
