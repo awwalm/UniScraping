@@ -8,6 +8,11 @@ from pathlib import Path
 # noinspection PyProtectedMember
 from bs4 import Comment
 from selenium import webdriver
+
+from selenium.common.exceptions import *
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.wait import WebDriverWait
 from CustomMethods import DurationConverter, TemplateData
 import bs4 as bs4
 import requests
@@ -23,7 +28,7 @@ def get_page(url):
         r = requests.get(url)
         if r.status_code == 200:
             return bs4.BeautifulSoup(r.content, 'html.parser')
-    except Exception as e:
+    except Exception:
         pass
     return None
 
@@ -67,23 +72,16 @@ def has_numbers(input_string):
 # ENSURE YOU CHANGE THE DIRECTORY AND EXE PATH IF NEEDED (UNLESS YOU'RE NOT USING WINDOWS!)
 option = webdriver.ChromeOptions()
 option.add_argument(" - incognito")
-option.add_argument("headless")
+# option.add_argument("headless")
 exec_path = Path(os.getcwd().replace('\\', '/'))
 exec_path = exec_path.parent.parent.parent.__str__() + '/Libraries/Google/v86/chromedriver.exe'
 browser = webdriver.Chrome(executable_path=exec_path, chrome_options=option)
+delay = 2
 
 # read the url from each file into a list
 course_links_file_path = Path(os.getcwd().replace('\\', '/'))
 course_links_file_path = course_links_file_path.__str__() + '/gordon_links_file'
 course_links_file = open(course_links_file_path, 'r')
-
-ft_course_links_file_path = Path(os.getcwd().replace('\\', '/'))
-ft_course_links_file_path = ft_course_links_file_path.__str__() + '/gordon_free_tafe_links_file'
-ft_course_links_file = open(ft_course_links_file_path, 'r')
-
-ta_course_links_file_path = Path(os.getcwd().replace('\\', '/'))
-ta_course_links_file_path = ta_course_links_file_path.__str__() + '/gordon_train_links_file'
-ta_course_links_file = open(ta_course_links_file_path, 'r')
 
 # the csv file we'll be saving the courses to
 csv_file_path = Path(os.getcwd().replace('\\', '/'))
@@ -113,7 +111,47 @@ course_data_template = {'Level_Code': '', 'University': '', 'City': '', 'Course'
                         'Blended': 'No', 'Remarks': '',
                         'Course_Delivery_Mode': 'Traineeship',
                         # is this an Apprenticeship, Traineeship, or just a Normal course?
-                        'FREE_TAFE': 'No'  # is this a free of charge TAFE course, supposedly sponsored by agencies?
+                        'FREE_TAFE': 'No',  # is this a free of charge TAFE course, supposedly sponsored by agencies?
+                        'Subject_or_Unit_1': '', 'Subject_Objective_1': '', 'Subject_Description_1': '',
+                        'Subject_or_Unit_2': '', 'Subject_Objective_2': '', 'Subject_Description_2': '',
+                        'Subject_or_Unit_3': '', 'Subject_Objective_3': '', 'Subject_Description_3': '',
+                        'Subject_or_Unit_4': '', 'Subject_Objective_4': '', 'Subject_Description_4': '',
+                        'Subject_or_Unit_5': '', 'Subject_Objective_5': '', 'Subject_Description_5': '',
+                        'Subject_or_Unit_6': '', 'Subject_Objective_6': '', 'Subject_Description_6': '',
+                        'Subject_or_Unit_7': '', 'Subject_Objective_7': '', 'Subject_Description_7': '',
+                        'Subject_or_Unit_8': '', 'Subject_Objective_8': '', 'Subject_Description_8': '',
+                        'Subject_or_Unit_9': '', 'Subject_Objective_9': '', 'Subject_Description_9': '',
+                        'Subject_or_Unit_10': '', 'Subject_Objective_10': '', 'Subject_Description_10': '',
+                        'Subject_or_Unit_11': '', 'Subject_Objective_11': '', 'Subject_Description_11': '',
+                        'Subject_or_Unit_12': '', 'Subject_Objective_12': '', 'Subject_Description_12': '',
+                        'Subject_or_Unit_13': '', 'Subject_Objective_13': '', 'Subject_Description_13': '',
+                        'Subject_or_Unit_14': '', 'Subject_Objective_14': '', 'Subject_Description_14': '',
+                        'Subject_or_Unit_15': '', 'Subject_Objective_15': '', 'Subject_Description_15': '',
+                        'Subject_or_Unit_16': '', 'Subject_Objective_16': '', 'Subject_Description_16': '',
+                        'Subject_or_Unit_17': '', 'Subject_Objective_17': '', 'Subject_Description_17': '',
+                        'Subject_or_Unit_18': '', 'Subject_Objective_18': '', 'Subject_Description_18': '',
+                        'Subject_or_Unit_19': '', 'Subject_Objective_19': '', 'Subject_Description_19': '',
+                        'Subject_or_Unit_20': '', 'Subject_Objective_20': '', 'Subject_Description_20': '',
+                        'Subject_or_Unit_21': '', 'Subject_Objective_21': '', 'Subject_Description_21': '',
+                        'Subject_or_Unit_22': '', 'Subject_Objective_22': '', 'Subject_Description_22': '',
+                        'Subject_or_Unit_23': '', 'Subject_Objective_23': '', 'Subject_Description_23': '',
+                        'Subject_or_Unit_24': '', 'Subject_Objective_24': '', 'Subject_Description_24': '',
+                        'Subject_or_Unit_25': '', 'Subject_Objective_25': '', 'Subject_Description_25': '',
+                        'Subject_or_Unit_26': '', 'Subject_Objective_26': '', 'Subject_Description_26': '',
+                        'Subject_or_Unit_27': '', 'Subject_Objective_27': '', 'Subject_Description_27': '',
+                        'Subject_or_Unit_28': '', 'Subject_Objective_28': '', 'Subject_Description_28': '',
+                        'Subject_or_Unit_29': '', 'Subject_Objective_29': '', 'Subject_Description_29': '',
+                        'Subject_or_Unit_30': '', 'Subject_Objective_30': '', 'Subject_Description_30': '',
+                        'Subject_or_Unit_31': '', 'Subject_Objective_31': '', 'Subject_Description_31': '',
+                        'Subject_or_Unit_32': '', 'Subject_Objective_32': '', 'Subject_Description_32': '',
+                        'Subject_or_Unit_33': '', 'Subject_Objective_33': '', 'Subject_Description_33': '',
+                        'Subject_or_Unit_34': '', 'Subject_Objective_34': '', 'Subject_Description_34': '',
+                        'Subject_or_Unit_35': '', 'Subject_Objective_35': '', 'Subject_Description_35': '',
+                        'Subject_or_Unit_36': '', 'Subject_Objective_36': '', 'Subject_Description_36': '',
+                        'Subject_or_Unit_37': '', 'Subject_Objective_37': '', 'Subject_Description_37': '',
+                        'Subject_or_Unit_38': '', 'Subject_Objective_38': '', 'Subject_Description_38': '',
+                        'Subject_or_Unit_39': '', 'Subject_Objective_39': '', 'Subject_Description_39': '',
+                        'Subject_or_Unit_40': '', 'Subject_Objective_40': '', 'Subject_Description_40': ''
                         }
 
 # noinspection SpellCheckingInspection
@@ -151,9 +189,48 @@ for each_url in course_links_file:
                    'Career_Outcomes': '',
                    'Country': 'Australia', 'Online': 'No', 'Offline': 'Yes', 'Distance': 'No', 'Face_to_Face': 'Yes',
                    'Blended': 'No', 'Remarks': '',
-                   'Course_Delivery_Mode': 'Traineeship',
-                   # is this an Apprenticeship, Traineeship, or just a Normal course?
-                   'FREE_TAFE': 'No'  # is this a free of charge TAFE course, supposedly sponsored by agencies?
+                   'Course_Delivery_Mode': 'Traineeship',  # is this an Apprenticeship, Traineeship, or just a Normal course?
+                   'FREE_TAFE': 'No',  # is this a free of charge TAFE course, supposedly sponsored by agencies?
+                   'Subject_or_Unit_1': '', 'Subject_Objective_1': '', 'Subject_Description_1': '',
+                   'Subject_or_Unit_2': '', 'Subject_Objective_2': '', 'Subject_Description_2': '',
+                   'Subject_or_Unit_3': '', 'Subject_Objective_3': '', 'Subject_Description_3': '',
+                   'Subject_or_Unit_4': '', 'Subject_Objective_4': '', 'Subject_Description_4': '',
+                   'Subject_or_Unit_5': '', 'Subject_Objective_5': '', 'Subject_Description_5': '',
+                   'Subject_or_Unit_6': '', 'Subject_Objective_6': '', 'Subject_Description_6': '',
+                   'Subject_or_Unit_7': '', 'Subject_Objective_7': '', 'Subject_Description_7': '',
+                   'Subject_or_Unit_8': '', 'Subject_Objective_8': '', 'Subject_Description_8': '',
+                   'Subject_or_Unit_9': '', 'Subject_Objective_9': '', 'Subject_Description_9': '',
+                   'Subject_or_Unit_10': '', 'Subject_Objective_10': '', 'Subject_Description_10': '',
+                   'Subject_or_Unit_11': '', 'Subject_Objective_11': '', 'Subject_Description_11': '',
+                   'Subject_or_Unit_12': '', 'Subject_Objective_12': '', 'Subject_Description_12': '',
+                   'Subject_or_Unit_13': '', 'Subject_Objective_13': '', 'Subject_Description_13': '',
+                   'Subject_or_Unit_14': '', 'Subject_Objective_14': '', 'Subject_Description_14': '',
+                   'Subject_or_Unit_15': '', 'Subject_Objective_15': '', 'Subject_Description_15': '',
+                   'Subject_or_Unit_16': '', 'Subject_Objective_16': '', 'Subject_Description_16': '',
+                   'Subject_or_Unit_17': '', 'Subject_Objective_17': '', 'Subject_Description_17': '',
+                   'Subject_or_Unit_18': '', 'Subject_Objective_18': '', 'Subject_Description_18': '',
+                   'Subject_or_Unit_19': '', 'Subject_Objective_19': '', 'Subject_Description_19': '',
+                   'Subject_or_Unit_20': '', 'Subject_Objective_20': '', 'Subject_Description_20': '',
+                   'Subject_or_Unit_21': '', 'Subject_Objective_21': '', 'Subject_Description_21': '',
+                   'Subject_or_Unit_22': '', 'Subject_Objective_22': '', 'Subject_Description_22': '',
+                   'Subject_or_Unit_23': '', 'Subject_Objective_23': '', 'Subject_Description_23': '',
+                   'Subject_or_Unit_24': '', 'Subject_Objective_24': '', 'Subject_Description_24': '',
+                   'Subject_or_Unit_25': '', 'Subject_Objective_25': '', 'Subject_Description_25': '',
+                   'Subject_or_Unit_26': '', 'Subject_Objective_26': '', 'Subject_Description_26': '',
+                   'Subject_or_Unit_27': '', 'Subject_Objective_27': '', 'Subject_Description_27': '',
+                   'Subject_or_Unit_28': '', 'Subject_Objective_28': '', 'Subject_Description_28': '',
+                   'Subject_or_Unit_29': '', 'Subject_Objective_29': '', 'Subject_Description_29': '',
+                   'Subject_or_Unit_30': '', 'Subject_Objective_30': '', 'Subject_Description_30': '',
+                   'Subject_or_Unit_31': '', 'Subject_Objective_31': '', 'Subject_Description_31': '',
+                   'Subject_or_Unit_32': '', 'Subject_Objective_32': '', 'Subject_Description_32': '',
+                   'Subject_or_Unit_33': '', 'Subject_Objective_33': '', 'Subject_Description_33': '',
+                   'Subject_or_Unit_34': '', 'Subject_Objective_34': '', 'Subject_Description_34': '',
+                   'Subject_or_Unit_35': '', 'Subject_Objective_35': '', 'Subject_Description_35': '',
+                   'Subject_or_Unit_36': '', 'Subject_Objective_36': '', 'Subject_Description_36': '',
+                   'Subject_or_Unit_37': '', 'Subject_Objective_37': '', 'Subject_Description_37': '',
+                   'Subject_or_Unit_38': '', 'Subject_Objective_38': '', 'Subject_Description_38': '',
+                   'Subject_or_Unit_39': '', 'Subject_Objective_39': '', 'Subject_Description_39': '',
+                   'Subject_or_Unit_40': '', 'Subject_Objective_40': '', 'Subject_Description_40': ''
                    }
 
     actual_cities = set()
@@ -365,6 +442,34 @@ for each_url in course_links_file:
     except (TypeError, AttributeError):
         pass
 
+    try:
+        THE_XPATH = "//div[@id='UnitsTable']/div[@class='row']/span[1]"
+        DROPDOWN = "//div[contains(text(), 'Units & Assessment')]"
+        WebDriverWait(browser, delay).until(
+            EC.presence_of_all_elements_located(
+                (By.XPATH, f'{DROPDOWN}'))
+        )
+        WebDriverWait(browser, delay).until(
+            EC.presence_of_all_elements_located(
+                (By.XPATH, f'{THE_XPATH}'))
+        )
+        dropdown = browser.find_element_by_xpath(f'{DROPDOWN}')
+        dropdown.click()
+        time.sleep(0.2)
+        values = browser.find_elements_by_xpath(f'{THE_XPATH}')
+        subjects = []
+        for v in values:
+            subjects.append(v.text)
+        i = 1
+        for s in subjects:
+            course_data[f'Subject_or_Unit_{i}'] = s
+            print(f'subject {i}: {s}')
+            i += 1
+            if i is 40:
+                break
+    except (AttributeError, TimeoutException, NoSuchElementException, ElementNotInteractableException) as e:
+        print(f'cant extract subject objective: {e}')
+
     # duplicating entries with multiple cities for each city
     for i in actual_cities:
         try:
@@ -413,3 +518,5 @@ with open(csv_file, 'w', encoding='utf-8', newline='') as output_file:
     dict_writer = csv.DictWriter(output_file, course_dict_keys)
     dict_writer.writeheader()
     dict_writer.writerows(course_data_all)
+
+browser.quit()
