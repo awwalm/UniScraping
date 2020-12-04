@@ -6,12 +6,20 @@ import time
 from pathlib import Path
 
 # noinspection PyProtectedMember
+from urllib.parse import urljoin
+
 from bs4 import Comment
 from selenium import webdriver
+from selenium.common.exceptions import TimeoutException, ElementNotInteractableException, NoSuchElementException
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.wait import WebDriverWait
 from CustomMethods import DurationConverter, TemplateData
 import bs4 as bs4
 import requests
 import os
+
+from CustomMethods.DurationConverter import convert_duration
 
 
 def get_page(url):
@@ -72,6 +80,8 @@ exec_path = Path(os.getcwd().replace('\\', '/'))
 exec_path = exec_path.parent.parent.parent.__str__() + '/Libraries/Google/v86/chromedriver.exe'
 browser = webdriver.Chrome(executable_path=exec_path, chrome_options=option)
 
+delay = 2
+
 # read the url from each file into a list
 course_links_file_path = Path(os.getcwd().replace('\\', '/'))
 course_links_file_path = course_links_file_path.__str__() + '/scu_links_file'
@@ -102,7 +112,48 @@ course_data_template = {'Level_Code': '', 'University': 'Southern Cross Universi
                         'Career_Outcomes': '',
                         'Country': 'Australia', 'Online': 'No', 'Offline': 'Yes', 'Distance': 'No',
                         'Face_to_Face': 'Yes',
-                        'Blended': 'No', 'Remarks': ''}
+                        'Blended': 'No', 'Remarks': '',
+                        'Subject_or_Unit_1': '', 'Subject_Objective_1': '', 'Subject_Description_1': '',
+                        'Subject_or_Unit_2': '', 'Subject_Objective_2': '', 'Subject_Description_2': '',
+                        'Subject_or_Unit_3': '', 'Subject_Objective_3': '', 'Subject_Description_3': '',
+                        'Subject_or_Unit_4': '', 'Subject_Objective_4': '', 'Subject_Description_4': '',
+                        'Subject_or_Unit_5': '', 'Subject_Objective_5': '', 'Subject_Description_5': '',
+                        'Subject_or_Unit_6': '', 'Subject_Objective_6': '', 'Subject_Description_6': '',
+                        'Subject_or_Unit_7': '', 'Subject_Objective_7': '', 'Subject_Description_7': '',
+                        'Subject_or_Unit_8': '', 'Subject_Objective_8': '', 'Subject_Description_8': '',
+                        'Subject_or_Unit_9': '', 'Subject_Objective_9': '', 'Subject_Description_9': '',
+                        'Subject_or_Unit_10': '', 'Subject_Objective_10': '', 'Subject_Description_10': '',
+                        'Subject_or_Unit_11': '', 'Subject_Objective_11': '', 'Subject_Description_11': '',
+                        'Subject_or_Unit_12': '', 'Subject_Objective_12': '', 'Subject_Description_12': '',
+                        'Subject_or_Unit_13': '', 'Subject_Objective_13': '', 'Subject_Description_13': '',
+                        'Subject_or_Unit_14': '', 'Subject_Objective_14': '', 'Subject_Description_14': '',
+                        'Subject_or_Unit_15': '', 'Subject_Objective_15': '', 'Subject_Description_15': '',
+                        'Subject_or_Unit_16': '', 'Subject_Objective_16': '', 'Subject_Description_16': '',
+                        'Subject_or_Unit_17': '', 'Subject_Objective_17': '', 'Subject_Description_17': '',
+                        'Subject_or_Unit_18': '', 'Subject_Objective_18': '', 'Subject_Description_18': '',
+                        'Subject_or_Unit_19': '', 'Subject_Objective_19': '', 'Subject_Description_19': '',
+                        'Subject_or_Unit_20': '', 'Subject_Objective_20': '', 'Subject_Description_20': '',
+                        'Subject_or_Unit_21': '', 'Subject_Objective_21': '', 'Subject_Description_21': '',
+                        'Subject_or_Unit_22': '', 'Subject_Objective_22': '', 'Subject_Description_22': '',
+                        'Subject_or_Unit_23': '', 'Subject_Objective_23': '', 'Subject_Description_23': '',
+                        'Subject_or_Unit_24': '', 'Subject_Objective_24': '', 'Subject_Description_24': '',
+                        'Subject_or_Unit_25': '', 'Subject_Objective_25': '', 'Subject_Description_25': '',
+                        'Subject_or_Unit_26': '', 'Subject_Objective_26': '', 'Subject_Description_26': '',
+                        'Subject_or_Unit_27': '', 'Subject_Objective_27': '', 'Subject_Description_27': '',
+                        'Subject_or_Unit_28': '', 'Subject_Objective_28': '', 'Subject_Description_28': '',
+                        'Subject_or_Unit_29': '', 'Subject_Objective_29': '', 'Subject_Description_29': '',
+                        'Subject_or_Unit_30': '', 'Subject_Objective_30': '', 'Subject_Description_30': '',
+                        'Subject_or_Unit_31': '', 'Subject_Objective_31': '', 'Subject_Description_31': '',
+                        'Subject_or_Unit_32': '', 'Subject_Objective_32': '', 'Subject_Description_32': '',
+                        'Subject_or_Unit_33': '', 'Subject_Objective_33': '', 'Subject_Description_33': '',
+                        'Subject_or_Unit_34': '', 'Subject_Objective_34': '', 'Subject_Description_34': '',
+                        'Subject_or_Unit_35': '', 'Subject_Objective_35': '', 'Subject_Description_35': '',
+                        'Subject_or_Unit_36': '', 'Subject_Objective_36': '', 'Subject_Description_36': '',
+                        'Subject_or_Unit_37': '', 'Subject_Objective_37': '', 'Subject_Description_37': '',
+                        'Subject_or_Unit_38': '', 'Subject_Objective_38': '', 'Subject_Description_38': '',
+                        'Subject_or_Unit_39': '', 'Subject_Objective_39': '', 'Subject_Description_39': '',
+                        'Subject_or_Unit_40': '', 'Subject_Objective_40': '', 'Subject_Description_40': ''
+                        }
 
 possible_cities = {'gold coast': 'Gold Coast',
                    'lismore': 'New South Wales',
@@ -118,9 +169,7 @@ other_cities = {}
 
 campuses = set()
 
-sample = ['https://study.unisa.edu.au/degrees/bachelor-of-interior-architecture/int',
-          'https://online.unisa.edu.au/degrees/bachelor-of-business-financial-planning/int',
-          'https://study.unisa.edu.au/courses/100722']
+sample = ["https://www.scu.edu.au/study-at-scu/courses/master-of-teaching-1207286/2021/"]
 
 # MAIN ROUTINE
 for each_url in course_links_file:
@@ -135,7 +184,48 @@ for each_url in course_links_file:
                    'Website': '', 'Course_Lang': 'English', 'Availability': 'A', 'Description': '',
                    'Career_Outcomes': '',
                    'Country': 'Australia', 'Online': 'No', 'Offline': 'Yes', 'Distance': 'No', 'Face_to_Face': 'Yes',
-                   'Blended': 'No', 'Remarks': ''}
+                   'Blended': 'No', 'Remarks': '',
+                   'Subject_or_Unit_1': '', 'Subject_Objective_1': '', 'Subject_Description_1': '',
+                   'Subject_or_Unit_2': '', 'Subject_Objective_2': '', 'Subject_Description_2': '',
+                   'Subject_or_Unit_3': '', 'Subject_Objective_3': '', 'Subject_Description_3': '',
+                   'Subject_or_Unit_4': '', 'Subject_Objective_4': '', 'Subject_Description_4': '',
+                   'Subject_or_Unit_5': '', 'Subject_Objective_5': '', 'Subject_Description_5': '',
+                   'Subject_or_Unit_6': '', 'Subject_Objective_6': '', 'Subject_Description_6': '',
+                   'Subject_or_Unit_7': '', 'Subject_Objective_7': '', 'Subject_Description_7': '',
+                   'Subject_or_Unit_8': '', 'Subject_Objective_8': '', 'Subject_Description_8': '',
+                   'Subject_or_Unit_9': '', 'Subject_Objective_9': '', 'Subject_Description_9': '',
+                   'Subject_or_Unit_10': '', 'Subject_Objective_10': '', 'Subject_Description_10': '',
+                   'Subject_or_Unit_11': '', 'Subject_Objective_11': '', 'Subject_Description_11': '',
+                   'Subject_or_Unit_12': '', 'Subject_Objective_12': '', 'Subject_Description_12': '',
+                   'Subject_or_Unit_13': '', 'Subject_Objective_13': '', 'Subject_Description_13': '',
+                   'Subject_or_Unit_14': '', 'Subject_Objective_14': '', 'Subject_Description_14': '',
+                   'Subject_or_Unit_15': '', 'Subject_Objective_15': '', 'Subject_Description_15': '',
+                   'Subject_or_Unit_16': '', 'Subject_Objective_16': '', 'Subject_Description_16': '',
+                   'Subject_or_Unit_17': '', 'Subject_Objective_17': '', 'Subject_Description_17': '',
+                   'Subject_or_Unit_18': '', 'Subject_Objective_18': '', 'Subject_Description_18': '',
+                   'Subject_or_Unit_19': '', 'Subject_Objective_19': '', 'Subject_Description_19': '',
+                   'Subject_or_Unit_20': '', 'Subject_Objective_20': '', 'Subject_Description_20': '',
+                   'Subject_or_Unit_21': '', 'Subject_Objective_21': '', 'Subject_Description_21': '',
+                   'Subject_or_Unit_22': '', 'Subject_Objective_22': '', 'Subject_Description_22': '',
+                   'Subject_or_Unit_23': '', 'Subject_Objective_23': '', 'Subject_Description_23': '',
+                   'Subject_or_Unit_24': '', 'Subject_Objective_24': '', 'Subject_Description_24': '',
+                   'Subject_or_Unit_25': '', 'Subject_Objective_25': '', 'Subject_Description_25': '',
+                   'Subject_or_Unit_26': '', 'Subject_Objective_26': '', 'Subject_Description_26': '',
+                   'Subject_or_Unit_27': '', 'Subject_Objective_27': '', 'Subject_Description_27': '',
+                   'Subject_or_Unit_28': '', 'Subject_Objective_28': '', 'Subject_Description_28': '',
+                   'Subject_or_Unit_29': '', 'Subject_Objective_29': '', 'Subject_Description_29': '',
+                   'Subject_or_Unit_30': '', 'Subject_Objective_30': '', 'Subject_Description_30': '',
+                   'Subject_or_Unit_31': '', 'Subject_Objective_31': '', 'Subject_Description_31': '',
+                   'Subject_or_Unit_32': '', 'Subject_Objective_32': '', 'Subject_Description_32': '',
+                   'Subject_or_Unit_33': '', 'Subject_Objective_33': '', 'Subject_Description_33': '',
+                   'Subject_or_Unit_34': '', 'Subject_Objective_34': '', 'Subject_Description_34': '',
+                   'Subject_or_Unit_35': '', 'Subject_Objective_35': '', 'Subject_Description_35': '',
+                   'Subject_or_Unit_36': '', 'Subject_Objective_36': '', 'Subject_Description_36': '',
+                   'Subject_or_Unit_37': '', 'Subject_Objective_37': '', 'Subject_Description_37': '',
+                   'Subject_or_Unit_38': '', 'Subject_Objective_38': '', 'Subject_Description_38': '',
+                   'Subject_or_Unit_39': '', 'Subject_Objective_39': '', 'Subject_Description_39': '',
+                   'Subject_or_Unit_40': '', 'Subject_Objective_40': '', 'Subject_Description_40': ''
+                   }
 
     actual_cities = []
 
@@ -252,11 +342,17 @@ for each_url in course_links_file:
                 course_data['Faculty'] = i
     print('FACULTY: ', course_data['Faculty'])
 
-    # COURSE DESCRIPTION
-    h2_div = soup.find('h2', text=re.compile('Course summary', re.IGNORECASE)).find_next('div')
-    if h2_div:
-        description = tag_text(h2_div)
-        course_data['Description'] = description
+    # DESCRIPTION
+    try:
+        THE_XPATH = "//h2[contains(text(), 'Course summary')]/following-sibling::div[1]"
+        WebDriverWait(browser, delay).until(
+            EC.presence_of_all_elements_located(
+                (By.XPATH, f'{THE_XPATH}'))
+        )
+        value = browser.find_element_by_xpath(f'{THE_XPATH}').text
+        course_data['Description'] = value
+    except (AttributeError, TimeoutException, NoSuchElementException, ElementNotInteractableException) as e:
+        print(f'cant extract description: {e}')
 
     # OUTCOMES
     try:
@@ -318,55 +414,37 @@ for each_url in course_links_file:
             print('no fees')
 
     # DURATION
-    td_target = soup.find('td', text=re.compile('Duration')).find_next('td')
-    if td_target:
-        duration_raw = tag_text(td_target).replace('\n', '')
-        if 'full-time' or 'full time' in duration_raw.lower():
+    try:
+        THE_XPATH = "(//td[text()='Duration'][1]/following-sibling::td[1])[1]"
+        WebDriverWait(browser, delay).until(
+            EC.presence_of_all_elements_located(
+                (By.XPATH, f'{THE_XPATH}'))
+        )
+        value = browser.find_element_by_xpath(f'{THE_XPATH}').text
+
+        duration = convert_duration(value.replace('trimester', 'semester').replace('yrs', 'years'))
+        course_data['Duration'] = duration[0]
+        course_data['Duration_Time'] = duration[1]
+        if duration[0] < 2 and 'month' in duration[1].lower():
+            course_data['Duration'] = duration[0]
+            course_data['Duration_Time'] = 'Month'
+        if duration[0] < 2 and 'year' in duration[1].lower():
+            course_data['Duration'] = duration[0]
+            course_data['Duration_Time'] = 'Year'
+        if 'week' in duration[1].lower():
+            course_data['Duration'] = duration[0]
+            course_data['Duration_Time'] = 'Weeks'
+
+        if 'full time' in value.lower() or 'full-time' in value.lower():
             course_data['Full_Time'] = 'Yes'
-        if 'part-time' or 'part time' in duration_raw.lower():
+        else:
+            course_data['Full_Time'] = 'No'
+        if 'part time' in value.lower() or 'part-time' in value.lower():
             course_data['Part_Time'] = 'Yes'
-        head, sep, tail = duration_raw.partition(';')
-        duration_data = head
-        p_word = duration_data
-        if 'year' in p_word.__str__().lower():
-            value_conv = DurationConverter.convert_duration(p_word)
-            duration = float(
-                ''.join(filter(str.isdigit, str(value_conv)))[0])
-            duration_time = 'Years'
-            if str(duration) == '1' or str(duration) == '1.00' or str(
-                    duration) == '1.0':
-                duration_time = 'Year'
-            course_data['Duration'] = duration
-            course_data['Duration_Time'] = duration_time
-            print('DURATION + DURATION TIME: ', duration, duration_time)
-        # print(tag_text(div_span))
-        elif 'month' in p_word.__str__().lower():
-            try:
-                value_conv = DurationConverter.convert_duration(p_word)
-                duration_1 = int(
-                    ''.join(filter(str.isdigit, str(value_conv)))[0])
-                duration_2 = int(
-                    ''.join(filter(str.isdigit, str(value_conv)))[1])
-                duration = str(duration_1) + str(duration_2)
-                duration_time = 'Months'
-                if str(duration) == '1' or str(duration) == '1.00' or str(
-                        duration) == '1.0':
-                    duration_time = 'Month'
-                course_data['Duration'] = duration
-                course_data['Duration_Time'] = duration_time
-                print('DURATION + DURATION TIME: ', duration, duration_time)
-            except IndexError:
-                value_conv = DurationConverter.convert_duration(p_word)
-                duration = float(
-                    ''.join(filter(str.isdigit, str(value_conv)))[0])
-                duration_time = 'Months'
-                if str(duration) == '1' or str(duration) == '1.00' or str(
-                        duration) == '1.0':
-                    duration_time = 'Month'
-                course_data['Duration'] = duration
-                course_data['Duration_Time'] = duration_time
-                print('DURATION + DURATION TIME: ', duration, duration_time)
-        # print('full time duration so far: ', duration_data)
+        else:
+            course_data['Part_Time'] = 'No'
+    except (AttributeError, TypeError, TimeoutException, NoSuchElementException, ElementNotInteractableException):
+        print('cant extract duration')
 
     # PREREQUISITE 2: IELTS
     try:
@@ -384,6 +462,72 @@ for each_url in course_links_file:
                 course_data['Prerequisite_2_grade_2'] = ielts
     except AttributeError:
         print('No IELTS score')
+
+    # SUBJECTS
+    try:
+        THE_XPATH = "//tr[@class='unit-row']/td/a[contains(@href, '/study-at-scu/units/')]"
+        WebDriverWait(browser, 1).until(
+            EC.presence_of_all_elements_located(
+                (By.XPATH, f'{THE_XPATH}'))
+        )
+        values = browser.find_elements_by_xpath(f'{THE_XPATH}')
+
+        a_tags = set().union(i for i in values)
+        subjects_links = []
+        domain_url = "https://www.scu.edu.au/"
+        delay = 3
+        for a in a_tags:
+            link = a.get_attribute('href')
+            if link:
+                link_ = urljoin(domain_url, link)
+                if link_ not in subjects_links:
+                    if link_ not in subjects_links:
+                        subjects_links.append(link_)
+            if len(subjects_links) is 40:
+                break
+        i = 1
+        for sl in subjects_links:
+            browser.get(sl)
+            try:
+                THE_XPATH = "//h1[1]"
+                WebDriverWait(browser, delay).until(
+                    EC.presence_of_all_elements_located(
+                        (By.XPATH, f'{THE_XPATH}'))
+                )
+                value = browser.find_element_by_xpath(f'{THE_XPATH}').text
+                course_data[f'Subject_or_Unit_{i}'] = value
+            except (AttributeError, TimeoutException, NoSuchElementException, ElementNotInteractableException) as e:
+                print(f'cant extract subject name {i}: {e}')
+            try:
+                THE_XPATH = "//h2[contains(text(), 'Unit description')]/following::*[1]"
+                WebDriverWait(browser, delay).until(
+                    EC.presence_of_all_elements_located(
+                        (By.XPATH, f'{THE_XPATH}'))
+                )
+                value = browser.find_element_by_xpath(f'{THE_XPATH}').text
+                course_data[f'Subject_Description_{i}'] = value
+            except (AttributeError, TimeoutException, NoSuchElementException, ElementNotInteractableException) as e:
+                print(f'cant extract subject description {i}: {e}')
+            try:
+                THE_XPATH = "//h2[contains(text(), 'Unit content')]/following::*[position() < 3]"
+                WebDriverWait(browser, delay).until(
+                    EC.presence_of_all_elements_located(
+                        (By.XPATH, f'{THE_XPATH}'))
+                )
+                values = browser.find_elements_by_xpath(f'{THE_XPATH}')
+                objectives = str()
+                for value in values:
+                    objectives += tag_text(bs4.BeautifulSoup('<div>' + value.get_attribute('innerHTML') + '</div>', 'lxml'))
+                time.sleep(0.2)
+                course_data[f'Subject_Objective_{i}'] = objectives
+            except (AttributeError, TimeoutException, NoSuchElementException, ElementNotInteractableException) as e:
+                print(f'cant extract subject objective {i}: {e}')
+            print(f"SUBJECT {i}: {course_data[f'Subject_or_Unit_{i}']}\n"
+                  f"SUBJECT OBJECTIVES {i}: {course_data[f'Subject_Objective_{i}']}\n"
+                  f"SUBJECT DESCRIPTION {i}: {course_data[f'Subject_Description_{i}']}\n")
+            i += 1
+    except (AttributeError, TimeoutException, NoSuchElementException, ElementNotInteractableException) as e:
+        print(f'cant extract subjects: {e}')
 
     # duplicating entries with multiple cities for each city
     for i in actual_cities:
