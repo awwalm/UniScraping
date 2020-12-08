@@ -6,10 +6,12 @@ import re
 import time
 from pathlib import Path
 
+# noinspection PyProtectedMember
+from urllib.parse import urljoin
+
+from bs4 import Comment
 import bs4 as bs4
 import requests
-# noinspection PyProtectedMember
-from bs4 import Comment
 from selenium import webdriver
 from selenium.common.exceptions import TimeoutException, NoSuchElementException, ElementNotInteractableException, \
     JavascriptException
@@ -82,6 +84,8 @@ exec_path = Path(os.getcwd().replace('\\', '/'))
 exec_path = exec_path.parent.parent.parent.__str__() + '/Libraries/Google/v86/chromedriver.exe'
 # browser = webdriver.Chrome(executable_path=exec_path, chrome_options=option)
 
+delay = 3
+
 # read the url from each file into a list
 course_links_file_path = Path(os.getcwd().replace('\\', '/'))
 course_links_file_path = course_links_file_path.__str__() + '/uo_sydney_links_file'
@@ -118,7 +122,48 @@ course_data_template = {'Level_Code': '', 'University': '', 'City': '', 'Course'
                         'Career_Outcomes': '',
                         'Country': 'Australia', 'Online': 'No', 'Offline': 'Yes', 'Distance': 'No',
                         'Face_to_Face': 'Yes',
-                        'Blended': 'No', 'Remarks': ''}
+                        'Blended': 'No', 'Remarks': '',
+                        'Subject_or_Unit_1': '', 'Subject_Objective_1': '', 'Subject_Description_1': '',
+                        'Subject_or_Unit_2': '', 'Subject_Objective_2': '', 'Subject_Description_2': '',
+                        'Subject_or_Unit_3': '', 'Subject_Objective_3': '', 'Subject_Description_3': '',
+                        'Subject_or_Unit_4': '', 'Subject_Objective_4': '', 'Subject_Description_4': '',
+                        'Subject_or_Unit_5': '', 'Subject_Objective_5': '', 'Subject_Description_5': '',
+                        'Subject_or_Unit_6': '', 'Subject_Objective_6': '', 'Subject_Description_6': '',
+                        'Subject_or_Unit_7': '', 'Subject_Objective_7': '', 'Subject_Description_7': '',
+                        'Subject_or_Unit_8': '', 'Subject_Objective_8': '', 'Subject_Description_8': '',
+                        'Subject_or_Unit_9': '', 'Subject_Objective_9': '', 'Subject_Description_9': '',
+                        'Subject_or_Unit_10': '', 'Subject_Objective_10': '', 'Subject_Description_10': '',
+                        'Subject_or_Unit_11': '', 'Subject_Objective_11': '', 'Subject_Description_11': '',
+                        'Subject_or_Unit_12': '', 'Subject_Objective_12': '', 'Subject_Description_12': '',
+                        'Subject_or_Unit_13': '', 'Subject_Objective_13': '', 'Subject_Description_13': '',
+                        'Subject_or_Unit_14': '', 'Subject_Objective_14': '', 'Subject_Description_14': '',
+                        'Subject_or_Unit_15': '', 'Subject_Objective_15': '', 'Subject_Description_15': '',
+                        'Subject_or_Unit_16': '', 'Subject_Objective_16': '', 'Subject_Description_16': '',
+                        'Subject_or_Unit_17': '', 'Subject_Objective_17': '', 'Subject_Description_17': '',
+                        'Subject_or_Unit_18': '', 'Subject_Objective_18': '', 'Subject_Description_18': '',
+                        'Subject_or_Unit_19': '', 'Subject_Objective_19': '', 'Subject_Description_19': '',
+                        'Subject_or_Unit_20': '', 'Subject_Objective_20': '', 'Subject_Description_20': '',
+                        'Subject_or_Unit_21': '', 'Subject_Objective_21': '', 'Subject_Description_21': '',
+                        'Subject_or_Unit_22': '', 'Subject_Objective_22': '', 'Subject_Description_22': '',
+                        'Subject_or_Unit_23': '', 'Subject_Objective_23': '', 'Subject_Description_23': '',
+                        'Subject_or_Unit_24': '', 'Subject_Objective_24': '', 'Subject_Description_24': '',
+                        'Subject_or_Unit_25': '', 'Subject_Objective_25': '', 'Subject_Description_25': '',
+                        'Subject_or_Unit_26': '', 'Subject_Objective_26': '', 'Subject_Description_26': '',
+                        'Subject_or_Unit_27': '', 'Subject_Objective_27': '', 'Subject_Description_27': '',
+                        'Subject_or_Unit_28': '', 'Subject_Objective_28': '', 'Subject_Description_28': '',
+                        'Subject_or_Unit_29': '', 'Subject_Objective_29': '', 'Subject_Description_29': '',
+                        'Subject_or_Unit_30': '', 'Subject_Objective_30': '', 'Subject_Description_30': '',
+                        'Subject_or_Unit_31': '', 'Subject_Objective_31': '', 'Subject_Description_31': '',
+                        'Subject_or_Unit_32': '', 'Subject_Objective_32': '', 'Subject_Description_32': '',
+                        'Subject_or_Unit_33': '', 'Subject_Objective_33': '', 'Subject_Description_33': '',
+                        'Subject_or_Unit_34': '', 'Subject_Objective_34': '', 'Subject_Description_34': '',
+                        'Subject_or_Unit_35': '', 'Subject_Objective_35': '', 'Subject_Description_35': '',
+                        'Subject_or_Unit_36': '', 'Subject_Objective_36': '', 'Subject_Description_36': '',
+                        'Subject_or_Unit_37': '', 'Subject_Objective_37': '', 'Subject_Description_37': '',
+                        'Subject_or_Unit_38': '', 'Subject_Objective_38': '', 'Subject_Description_38': '',
+                        'Subject_or_Unit_39': '', 'Subject_Objective_39': '', 'Subject_Description_39': '',
+                        'Subject_or_Unit_40': '', 'Subject_Objective_40': '', 'Subject_Description_40': ''
+                        }
 
 # noinspection SpellCheckingInspection
 possible_cities = {'Sydney': 'Sydney',
@@ -152,7 +197,48 @@ for each_url in course_links_file:
                    'Website': '', 'Course_Lang': 'English', 'Availability': 'A', 'Description': '',
                    'Career_Outcomes': '',
                    'Country': 'Australia', 'Online': 'No', 'Offline': 'Yes', 'Distance': 'No', 'Face_to_Face': 'Yes',
-                   'Blended': 'No', 'Remarks': ''}
+                   'Blended': 'No', 'Remarks': '',
+                   'Subject_or_Unit_1': '', 'Subject_Objective_1': '', 'Subject_Description_1': '',
+                   'Subject_or_Unit_2': '', 'Subject_Objective_2': '', 'Subject_Description_2': '',
+                   'Subject_or_Unit_3': '', 'Subject_Objective_3': '', 'Subject_Description_3': '',
+                   'Subject_or_Unit_4': '', 'Subject_Objective_4': '', 'Subject_Description_4': '',
+                   'Subject_or_Unit_5': '', 'Subject_Objective_5': '', 'Subject_Description_5': '',
+                   'Subject_or_Unit_6': '', 'Subject_Objective_6': '', 'Subject_Description_6': '',
+                   'Subject_or_Unit_7': '', 'Subject_Objective_7': '', 'Subject_Description_7': '',
+                   'Subject_or_Unit_8': '', 'Subject_Objective_8': '', 'Subject_Description_8': '',
+                   'Subject_or_Unit_9': '', 'Subject_Objective_9': '', 'Subject_Description_9': '',
+                   'Subject_or_Unit_10': '', 'Subject_Objective_10': '', 'Subject_Description_10': '',
+                   'Subject_or_Unit_11': '', 'Subject_Objective_11': '', 'Subject_Description_11': '',
+                   'Subject_or_Unit_12': '', 'Subject_Objective_12': '', 'Subject_Description_12': '',
+                   'Subject_or_Unit_13': '', 'Subject_Objective_13': '', 'Subject_Description_13': '',
+                   'Subject_or_Unit_14': '', 'Subject_Objective_14': '', 'Subject_Description_14': '',
+                   'Subject_or_Unit_15': '', 'Subject_Objective_15': '', 'Subject_Description_15': '',
+                   'Subject_or_Unit_16': '', 'Subject_Objective_16': '', 'Subject_Description_16': '',
+                   'Subject_or_Unit_17': '', 'Subject_Objective_17': '', 'Subject_Description_17': '',
+                   'Subject_or_Unit_18': '', 'Subject_Objective_18': '', 'Subject_Description_18': '',
+                   'Subject_or_Unit_19': '', 'Subject_Objective_19': '', 'Subject_Description_19': '',
+                   'Subject_or_Unit_20': '', 'Subject_Objective_20': '', 'Subject_Description_20': '',
+                   'Subject_or_Unit_21': '', 'Subject_Objective_21': '', 'Subject_Description_21': '',
+                   'Subject_or_Unit_22': '', 'Subject_Objective_22': '', 'Subject_Description_22': '',
+                   'Subject_or_Unit_23': '', 'Subject_Objective_23': '', 'Subject_Description_23': '',
+                   'Subject_or_Unit_24': '', 'Subject_Objective_24': '', 'Subject_Description_24': '',
+                   'Subject_or_Unit_25': '', 'Subject_Objective_25': '', 'Subject_Description_25': '',
+                   'Subject_or_Unit_26': '', 'Subject_Objective_26': '', 'Subject_Description_26': '',
+                   'Subject_or_Unit_27': '', 'Subject_Objective_27': '', 'Subject_Description_27': '',
+                   'Subject_or_Unit_28': '', 'Subject_Objective_28': '', 'Subject_Description_28': '',
+                   'Subject_or_Unit_29': '', 'Subject_Objective_29': '', 'Subject_Description_29': '',
+                   'Subject_or_Unit_30': '', 'Subject_Objective_30': '', 'Subject_Description_30': '',
+                   'Subject_or_Unit_31': '', 'Subject_Objective_31': '', 'Subject_Description_31': '',
+                   'Subject_or_Unit_32': '', 'Subject_Objective_32': '', 'Subject_Description_32': '',
+                   'Subject_or_Unit_33': '', 'Subject_Objective_33': '', 'Subject_Description_33': '',
+                   'Subject_or_Unit_34': '', 'Subject_Objective_34': '', 'Subject_Description_34': '',
+                   'Subject_or_Unit_35': '', 'Subject_Objective_35': '', 'Subject_Description_35': '',
+                   'Subject_or_Unit_36': '', 'Subject_Objective_36': '', 'Subject_Description_36': '',
+                   'Subject_or_Unit_37': '', 'Subject_Objective_37': '', 'Subject_Description_37': '',
+                   'Subject_or_Unit_38': '', 'Subject_Objective_38': '', 'Subject_Description_38': '',
+                   'Subject_or_Unit_39': '', 'Subject_Objective_39': '', 'Subject_Description_39': '',
+                   'Subject_or_Unit_40': '', 'Subject_Objective_40': '', 'Subject_Description_40': ''
+                   }
 
     actual_cities = set()
 
@@ -233,7 +319,7 @@ for each_url in course_links_file:
                 rem3tag = soup.find('h3', class_='b-title b-title--module-h2 b-title--first').find_parent('div',
                                                                                                           class_='b-text--size-base')
                 if rem3tag:
-                    remarks = tag_text(rem3tag).replace('\n', '\t')
+                    remarks = tag_text(rem3tag).replace('\n', ' | ')
                     course_data['Remarks'] = remarks
             except AttributeError:
                 pass
@@ -343,7 +429,7 @@ for each_url in course_links_file:
                     if duration_div:
                         d_val = tag_text(duration_div)
                         print('part-time duration so far: ', d_val)
-                        course_data['Remarks'] = d_val + '\t' + course_data['Remarks']
+                        course_data['Remarks'] = d_val + ' | ' + course_data['Remarks']
                         if 'Not available part time' in d_val or 'Not available' in d_val:
                             course_data['Part_Time'] = 'No'
                         if 'part time' in d_val.lower() or 'part-time' in d_val.lower():
@@ -356,17 +442,17 @@ for each_url in course_links_file:
                             if duration[0] < 2 and 'month' in duration[1].lower():
                                 course_data['Duration'] = duration[0]
                                 course_data['Duration_Time'] = 'Month'
-                                course_data['Remarks'] = d_val + '\t' + course_data['Remarks']
+                                course_data['Remarks'] = d_val + ' | ' + course_data['Remarks']
                                 course_data['Part_Time'] = 'Yes'
                             if duration[0] < 2 and 'year' in duration[1].lower():
                                 course_data['Duration'] = duration[0]
                                 course_data['Duration_Time'] = 'Year'
-                                course_data['Remarks'] = d_val + '\t' + course_data['Remarks']
+                                course_data['Remarks'] = d_val + ' | ' + course_data['Remarks']
                                 course_data['Part_Time'] = 'Yes'
                             if 'week' in duration[1].lower():
                                 course_data['Duration'] = duration[0]
                                 course_data['Duration_Time'] = 'Weeks'
-                                course_data['Remarks'] = d_val + '\t' + course_data['Remarks']
+                                course_data['Remarks'] = d_val + ' | ' + course_data['Remarks']
                                 course_data['Part_Time'] = 'Yes'
                         if 'not available part time' in d_val.lower() or 'not available' in d_val.lower():
                             course_data['Part_Time'] = 'No'
@@ -382,15 +468,15 @@ for each_url in course_links_file:
                 if duration[0] < 2 and 'month' in duration[1].lower():
                     course_data['Duration'] = duration[0]
                     course_data['Duration_Time'] = 'Month'
-                    course_data['Remarks'] = d_val + '\t' + course_data['Remarks']
+                    course_data['Remarks'] = d_val + ' | ' + course_data['Remarks']
                 if duration[0] < 2 and 'year' in duration[1].lower():
                     course_data['Duration'] = duration[0]
                     course_data['Duration_Time'] = 'Year'
-                    course_data['Remarks'] = d_val + '\t' + course_data['Remarks']
+                    course_data['Remarks'] = d_val + ' | ' + course_data['Remarks']
                 if 'week' in duration[1].lower():
                     course_data['Duration'] = duration[0]
                     course_data['Duration_Time'] = 'Weeks'
-                    course_data['Remarks'] = d_val + '\t' + course_data['Remarks']
+                    course_data['Remarks'] = d_val + ' | ' + course_data['Remarks']
     except (AttributeError, IndexError, TypeError):
         print('trouble processing/extracting duration')
     # PART TIME
@@ -402,7 +488,7 @@ for each_url in course_links_file:
             if ': NA' in d_val or ': NA' in d_val:
                 course_data['Part_Time'] = 'No'
             print('part-time duration so far: ', d_val)
-            course_data['Remarks'] = d_val + '\t' + course_data['Remarks']
+            course_data['Remarks'] = d_val + ' | ' + course_data['Remarks']
             if 'Not available part time' in d_val or 'Not available' in d_val:
                 course_data['Part_Time'] = 'No'
             if 'part time' in d_val.lower() or 'part-time' in d_val.lower():
@@ -410,13 +496,13 @@ for each_url in course_links_file:
                 duration_ = d_val[colon_index:]
                 duration = convert_duration(duration_.replace('trimester', 'semester'))
                 if duration[0] < 2 and 'month' in duration[1].lower():
-                    course_data['Remarks'] = d_val + '\t' + course_data['Remarks']
+                    course_data['Remarks'] = d_val + ' | ' + course_data['Remarks']
                     course_data['Part_Time'] = 'Yes'
                 if duration[0] < 2 and 'year' in duration[1].lower():
-                    course_data['Remarks'] = d_val + '\t' + course_data['Remarks']
+                    course_data['Remarks'] = d_val + ' | ' + course_data['Remarks']
                     course_data['Part_Time'] = 'Yes'
                 if 'week' in duration[1].lower():
-                    course_data['Remarks'] = d_val + '\t' + course_data['Remarks']
+                    course_data['Remarks'] = d_val + ' | ' + course_data['Remarks']
                     course_data['Part_Time'] = 'Yes'
             if 'not available part time' in d_val.lower() or 'not available' in d_val.lower():
                 course_data['Part_Time'] = 'No'
@@ -434,8 +520,7 @@ for each_url in course_links_file:
                 course_data['Online'] = 'Yes'
             if 'intensive' in modes.lower():
                 course_data['Online'] = 'Yes'
-                course_data[
-                    'Blended'] = 'Yes'  # how do I know this? check here: https://www.sydney.edu.au/courses/courses/pc/master-of-medicine-advanced-clinical-neurophysiology.html
+                course_data['Blended'] = 'Yes'  # how do I know this? check here: https://www.sydney.edu.au/courses/courses/pc/master-of-medicine-advanced-clinical-neurophysiology.html
     except AttributeError:
         pass
 
@@ -444,7 +529,7 @@ for each_url in course_links_file:
         av_div = soup.find('div', class_='b-component b-box-compact b-details-panel') \
             .find_all('div', class_='b-details-panel__row')[8]
         if av_div:
-            av_text = tag_text(av_div) + '\n' + course_data['Remarks']
+            av_text = tag_text(av_div) + ' | ' + course_data['Remarks']
             course_data['Remarks'] = av_text
     except (AttributeError, IndexError):
         try:
@@ -453,7 +538,7 @@ for each_url in course_links_file:
                 .find_parent() \
                 .find_next()
             if av_div:
-                av_text = tag_text(av_div) + '\n' + course_data['Remarks']
+                av_text = tag_text(av_div) + ' | ' + course_data['Remarks']
                 course_data['Remarks'] = av_text.replace('\n', ' | ')
         except (AttributeError, IndexError):
             pass
@@ -729,6 +814,107 @@ for each_url in course_links_file:
                 print('pte found, but unable to extract')
     except (TimeoutException, NoSuchElementException, ElementNotInteractableException):
         pass
+
+    # SUBJECTS
+    go_ahead: bool = False
+
+    try:
+        THE_XPATH = "//*[contains(text(), 'Units of Study')]/ancestor::*[1]"
+        WebDriverWait(browser, delay).until(
+            EC.presence_of_all_elements_located(
+                (By.XPATH, f'{THE_XPATH}'))
+        )
+        element = browser.find_element_by_xpath(f'{THE_XPATH}')
+        element.click()
+        time.sleep(0.2)
+        go_ahead = True
+    except (AttributeError, TimeoutException, NoSuchElementException, ElementNotInteractableException) as e:
+        go_ahead = False
+        print(f'cant open subjects listing: {e}')
+
+    if go_ahead:
+        subjects_links = []
+        try:
+            THE_XPATH = "//div[@data-m-el='m-courses-uos-landing-page']//form/following::ul//a//span[text()='2021']/ancestor::a[contains(@class, 'course-tag')]"
+            WebDriverWait(browser, delay).until(
+                EC.presence_of_all_elements_located(
+                    (By.XPATH, f'{THE_XPATH}'))
+            )
+            a_tags = browser.find_elements_by_xpath(f'{THE_XPATH}')
+            domain_url = "https://www.sydney.edu.au/"
+            for a in a_tags:
+                link = a.get_attribute('href')
+                if link:
+                    link_ = urljoin(domain_url, link)
+                    if link_ not in subjects_links:
+                        if link_ not in subjects_links:
+                            subjects_links.append(link_)
+                if len(subjects_links) is 40:
+                    break
+
+            THE_XPATH = "//a[@class='m-pagination__item']"
+            WebDriverWait(browser, delay).until(
+                EC.presence_of_all_elements_located(
+                    (By.XPATH, f'{THE_XPATH}'))
+            )
+            pages = browser.find_elements_by_xpath(f'{THE_XPATH}')
+            for page in pages:
+                page.click()
+                time.sleep(0.1)
+                THE_XPATH = "//div[@data-m-el='m-courses-uos-landing-page']//form/following::ul//a//span[text()='2021']/ancestor::a[contains(@class, 'course-tag')]"
+                WebDriverWait(browser, delay).until(
+                    EC.presence_of_all_elements_located(
+                        (By.XPATH, f'{THE_XPATH}'))
+                )
+                a_tags = browser.find_elements_by_xpath(f'{THE_XPATH}')
+                domain_url = "https://www.sydney.edu.au/"
+                for a in a_tags:
+                    link = a.get_attribute('href')
+                    if link:
+                        link_ = urljoin(domain_url, link)
+                        if link_ not in subjects_links:
+                            subjects_links.append(link_)
+                    if len(subjects_links) is 40:
+                        break
+
+        except (AttributeError, TimeoutException, NoSuchElementException, ElementNotInteractableException) as e:
+            print(f'cant extract subject links: {e}')
+        try:
+            i = 1
+            for sl in subjects_links:
+                browser.get(sl)
+                try:
+                    THE_XPATH = "//h1[1]"
+                    WebDriverWait(browser, delay).until(
+                        EC.presence_of_all_elements_located(
+                            (By.XPATH, f'{THE_XPATH}'))
+                    )
+                    value = browser.find_element_by_xpath(f'{THE_XPATH}')
+                    course_data[f'Subject_or_Unit_{i}'] = tag_text(
+                        bs4.BeautifulSoup('<div>' + value.get_attribute('innerHTML') + '</div>', 'lxml'))
+                except (AttributeError, TimeoutException, NoSuchElementException, ElementNotInteractableException) as e:
+                    print(f'cant extract subject name {i}: {e}')
+                try:
+                    THE_XPATH = "//div[@data-js-el='overview-container']//p/ancestor::*[1]"
+                    WebDriverWait(browser, delay).until(
+                        EC.presence_of_all_elements_located(
+                            (By.XPATH, f'{THE_XPATH}'))
+                    )
+                    value = browser.find_element_by_xpath(f'{THE_XPATH}')
+                    course_data[f'Subject_Description_{i}'] = tag_text(
+                        bs4.BeautifulSoup('<div>' + value.get_attribute('innerHTML') + '</div>', 'lxml'))
+                except (AttributeError, TimeoutException, NoSuchElementException, ElementNotInteractableException) as e:
+                    print(f'cant extract subject description {i}: {e}')
+                print(f"SUBJECT {i}: {course_data[f'Subject_or_Unit_{i}']}\n"
+                      f"SUBJECT DESCRIPTION {i}: {course_data[f'Subject_Description_{i}']}\n")
+                if i is 40:
+                    break
+                i += 1
+        except (AttributeError, TimeoutException, NoSuchElementException, ElementNotInteractableException) as e:
+            print(f'cant extract subjects: {e}')
+
+    else:
+        print('unfortunately subjects cant be obtained')
 
     # duplicating entries with multiple cities for each city
     for i in actual_cities:
