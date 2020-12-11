@@ -1,0 +1,54 @@
+COMB1
+(09-12-20) COMB1
+Alpha Crucis
+ACS Distance
+Alphacrucis
+ANU
+Bond
+Charles Sturt
+
+COMB2
+(10-12-20) COMB1 + COMB2
+Divinity
+Excelsia
+EIT
+
+COMB3
+COMB2 + COMB3
+FUA
+Gordon
+Griffith
+
+COMB4
+IIBIT
+JCU
+JMC
+Melbourne IT
+Macquarie
+Notre Dame
+PLT C.O.L.
+SCU (Southern Cross University)
+Torrens
+
+COMB5
+UNISA
+UNSW @ ADFA
+UOMelbourne
+UOSydney
+USC (University of Sunshine Coast)
+UTSInSearch
+Western Sydney
+William Angliss
+
+======================
+
+(Sumaiya Files)
+ACN
+chisholm
+Endeavour
+Holmes Institute
+Monash
+Moore
+UNC
+UWA
+
